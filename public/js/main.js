@@ -2,10 +2,8 @@
 
 // This function returns the value associated with 'whichParam' is on the URL
 function getURLParameters( whichParam ){
-	var pageURL = window.location.search.substring(1);
-	console.log(pageURL);
-	var pageURLVariables = pageURL.split('&');
-	console.log(pageURLVariables);
+	var pageURL = window.location.search.substring(1);	
+	var pageURLVariables = pageURL.split('&');	
 	for( var i = 0; i < pageURLVariables.length; i++ ){
 		var parameterName = pageURLVariables[i].split( '=' );
 		if( parameterName[0] === whichParam ){
@@ -20,3 +18,10 @@ if( typeof username == 'undefined' || !username ){
 }
 
 $( '#messages' ).append( '<h4>' + getURLParameters( 'username' ) + '</h4>' );
+
+/* Connect to the socket server */
+var socket = io.connect();
+
+socket.on( 'log', function( array ) {
+	console.log.apply( console, array )
+});
