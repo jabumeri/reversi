@@ -13,12 +13,12 @@ function getURLParameters( whichParam ){
 }
 
 var username = getURLParameters( 'username' );
-if( typeof username == 'undefined' || !username ){
+if( ( typeof username == 'undefined' ) || !username ){
 	username = 'Anonymous_' + Math.random();
 }
 
 var chat_room = getURLParameters( 'game_id' );
-if( typeof chat_room == 'undefined' || !chat_room ){
+if( ( typeof chat_room == 'undefined' ) || !chat_room ){
 	chat_room = 'lobby';
 }
 
@@ -53,7 +53,7 @@ socket.on( 'join_room_response', function( payload ){
 		nodeB.addClass( 'col-9 text-right' );
 		nodeB.append( '<h4>' + payload.username + '</h4>' );
 
-		nodeC.addClass( 'cold-3 text-left' );
+		nodeC.addClass( 'col-3 text-left' );
 		var buttonC = makeInviteButton();
 		nodeC.append(buttonC);
 
@@ -89,12 +89,12 @@ socket.on( 'player_disconnected', function( payload ){
 	}
 
 	var dom_elements = $( '.socket_' + payload.socket_id );
-	if( dom_elements.length == 0 ){
+	if( dom_elements.length != 0 ){
 		dom_elements.slideUp( 1000 );
 	}
 
 	var newHTML = '<p>' + payload.username + ' has left the lobby</p>';
-	var newNode = $(newHTML);
+	var newNode = $( newHTML );
 	
 	newNode.hide();
 	$( '#messages' ).append( newNode );
