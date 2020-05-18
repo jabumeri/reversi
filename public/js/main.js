@@ -48,13 +48,14 @@ socket.on( 'join_room_response', function( payload ){
 		var nodeC = $( '<div></div>' );
 		nodeC.addClass( 'socket_' + payload.socket_id );
 
-		nodeA.addClass( 'w-100' );		
+		nodeA.addClass( 'w-100' );
+
 		nodeB.addClass( 'col-9 text-right' );
 		nodeB.append( '<h4>' + payload.username + '</h4>' );
 
 		nodeC.addClass( 'cold-3 text-left' );
 		var buttonC = makeInviteButton();
-		nodeC.append(buttonC)
+		nodeC.append(buttonC);
 
 		nodeA.hide();
 		nodeB.hide();
@@ -88,7 +89,7 @@ socket.on( 'player_disconnected', function( payload ){
 	}
 
 	var dom_elements = $( '.socket_' + payload.socket_id );
-	if( dom_elements.length != 0 ){
+	if( dom_elements.length == 0 ){
 		dom_elements.slideUp( 1000 );
 	}
 
