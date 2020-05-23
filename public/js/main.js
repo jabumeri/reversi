@@ -174,8 +174,12 @@ socket.on( 'game_start_response', function( payload ){
 
 	var newNode = makeEngagedButton( payload.socket_id ); 
 	$( '.socket_' + payload.socket_id + ' button' ).replaceWith( newNode );
+	
+	setTimeout(function() {
+		window.location.href = 'game.html?username=' + username + '&game_id=' + payload.game_id;
+	}, 2000);
 
-	window.location.href = 'game.html?username=' + username + '&game_id=' + payload.game_id;
+	// window.location.href = 'game.html?username=' + username + '&game_id=' + payload.game_id;
 });
 
 function send_message(){
