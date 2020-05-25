@@ -457,8 +457,8 @@ io.sockets.on( 'connection', function( socket ){
 			return;
 		}	
 
-		var row = players[socket.id].row;
-		if( typeof row === 'undefined' || row < 0 || row > 7 ){
+		var row = payload.row;
+		if( ( typeof row === 'undefined' ) || row < 0 || row > 7 ){
 			var error_message = 'play_token did not specify a valid row, command aborted';
 			log( error_message );
 			socket.emit( 'play_token_response' , {
@@ -468,8 +468,8 @@ io.sockets.on( 'connection', function( socket ){
 			return;
 		}
 
-		var column = players[socket.id].column;
-		if( typeof column === 'undefined' || column < 0 || column > 7 ){
+		var column = payload.column;
+		if( ( typeof column === 'undefined' ) || column < 0 || column > 7 ){
 			var error_message = 'play_token did not specify a valid column, command aborted';
 			log( error_message );
 			socket.emit( 'play_token_response' , {
@@ -479,7 +479,7 @@ io.sockets.on( 'connection', function( socket ){
 			return;
 		}
 
-		var color = players[socket.id].color;
+		var color = payload.color;
 		if( typeof color === 'undefined' || !color || ( color != 'black' && color != 'white' ) ){
 			var error_message = 'play_token did not specify a valid color , command aborted';
 			log( error_message );
@@ -490,7 +490,7 @@ io.sockets.on( 'connection', function( socket ){
 			return;
 		}
 
-		var game = players[socket.id].game;
+		var game = games[game_id];
 		if( typeof game === 'undefined' || !game ){
 			var error_message = 'play_token could not find your game board, command aborted';
 			log( error_message );
@@ -562,8 +562,50 @@ function send_game_update( socket, game_id, message ){
 	}
 
 	// make sure that only 2 people are in the game room
+	var roomObject;
+	var numClients; 
+	do {	
+		roomObject = io.sockets.adapter.rooms[game_id];
+		numClients = roomObject.length;
+		if( numClients > 2 ){
+			console.log( 'Too many clients in room: ' + game_id + ' #: ' + numClients );
+			if( games[game_id].player_white.socket == roomObject.sockets[0] ){
+				games[game_id].player_white.socket = '';
+				games[game_id].player_white.username = '';
+			}
+			if( games[game_id].player_black.socket == roomObject.sockets[0] ){
+				games[game_id].player_black.socket = '';
+				games[game_id].player_black.username = '';
+			}
+			var sacrifice = Object.keys( roomObject.sockets )[0];
+			io.of('/').connected[sacrifice].leave( game_id );
+		}
+	} while( ( numClients - 1 ) > 2 );
 
 	// assign this socket a color 
+	if( ( games[game_id].player_white.socket != socket.id ) && ( games[game_id].player_black.socket != socket.id ) ){
+		console.log('Player is not assigned a color: ' + socket.id );
+		if( ( games[game_id].player_black.socket != '' ) && ( games[game_id].player_white.socket != ''  ) ){
+			games[game_id].player_white.socket = '';
+			games[game_id].player_white.username = '';
+			games[game_id].player_black.socket = '';
+			games[game_id].player_black.username = '';
+		}
+	}
+
+	if( games[game_id].player_white.socket == '' ){
+		if( games[game_id].player_black.socket != socket.id ){
+			games[game_id].player_white.socket = socket.id;
+			games[game_id].player_white.username = players[socket.id].username;
+		}
+	}	
+
+	if( games[game_id].player_black.socket == '' ){
+		if( games[game_id].player_white.socket != socket.id ){
+			games[game_id].player_black.socket = socket.id;
+			games[game_id].player_black.username = players[socket.id].username;
+		}
+	}
 
 	// send game update 
 	var successData = {
@@ -574,7 +616,34 @@ function send_game_update( socket, game_id, message ){
 	};
 
 	io.in( game_id ).emit( 'game_update', successData );
+	
 	// check to see if the game is over 
+	var row, column;
+	var count = 0;
+
+	for( row = 0; row < 8; row++ ){
+		for( column = 0; column < 8; column++ ){
+			if( games[game_id].board[row][column] != ' '){
+				count++;
+			}
+		}
+	}
+
+	if( count == 64 ){
+			var successData = {
+			 	result: 'success',
+			 	game: games[game_id],
+			 	who_won: 'everyone',
+			 	game_id: game_id
+			};
+
+			io.in( game_id ).emit( 'game_over', successData );
+			setTimeout( function( id ){
+				return function(){
+					delete games[id];
+				}
+			}( game_id ), 60*60*1000 );
+		}
 
 }
 
