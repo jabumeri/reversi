@@ -630,20 +630,20 @@ function send_game_update( socket, game_id, message ){
 	}
 
 	if( count == 64 ){
-			var successData = {
-			 	result: 'success',
-			 	game: games[game_id],
-			 	who_won: 'everyone',
-			 	game_id: game_id
-			};
+		var successData = {
+		 	result: 'success',
+		 	game: games[game_id],
+		 	who_won: 'everyone',
+		 	game_id: game_id
+		};
 
-			io.in( game_id ).emit( 'game_over', successData );
-			setTimeout( function( id ){
-				return function(){
-					delete games[id];
-				}
-			}( game_id ), 60*60*1000 );
-		}
+		io.in( game_id ).emit( 'game_over', successData );
+		setTimeout( function( id ){
+			return function(){
+				delete games[id];
+			}
+		}( game_id ), 60*60*1000 );
+	}
 
 }
 
