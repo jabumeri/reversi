@@ -375,13 +375,18 @@ socket.on( 'play_token_response', function( payload) {
 });
 
 socket.on( 'game_over', function( payload) {
+	var display_color = { 
+		'white': 'Sunflower',
+		'black': 'Red flower'
+	};
+	
 	console.log( '*** Client Log Message: \'game_over\' payload: ' + JSON.stringify( payload ) );
 	if( payload.result == 'fail' ){
 		console.log( payload.message );		
 		return;
 	}
 
-	$( '#game_over' ).html( '<h1>Game Over</h1><h2>' + payload.who_won + ' won!</h2>' );
+	$( '#game_over' ).html( '<h1>Game Over</h1><h2>' + display_color[payload.who_won] + ' won!</h2>' );
 	$( '#game_over' ).append( '<a href= "lobby.html?username=' + username + '" class="btn btn-success btn-lg active" role="button" aria-pressed="true">Return to the lobby</a>' );
 });
 
