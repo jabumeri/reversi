@@ -256,6 +256,7 @@ var old_board = [
 ];
 
 var my_color = ' ';
+var interval_timer;
 var display_color = { 
 	'white': 'sunflower',
 	'black': 'red flower'
@@ -287,7 +288,24 @@ socket.on( 'game_update', function( payload) {
 	}	
 
 	$( '#my_color' ).html( '<h3 id="my_color">I am the ' + display_color[my_color] + '</h3>');
-	$( '#my_color' ).append('<h4>It is ' + display_color[payload.game.whose_turn] + '\'s turn</h4>');
+	$( '#my_color' ).append('<h4>It is ' + display_color[payload.game.whose_turn] + '\'s turn. Elapsed time <span id="elapsed"></span></h4>');
+
+	clearInterval( interval_timer );
+	interval_timer = setInterval( function( last_time ){
+		return function(){
+			var d = new Date();
+			var elapsedmilli = d.getTime() - last_time; 
+			var minutes = Math.floor( elapsedmilli / ( 60 * 1000 ) ); 
+			var seconds = Math.floor( ( elapsedmilli % ( 60 * 1000 ) ) / 1000 ); 
+
+			if( seconds < 10 ){
+				$( '#elapsed' ).html( minutes + ' : 0' + seconds );	
+			} else {
+				$( '#elapsed' ).html( minutes + ' : ' + seconds );	
+			}
+			
+		}
+	}( payload.game.last_move_time ), 1000 );
 
 	var blacksum = 0;
 	var whitesum = 0;
